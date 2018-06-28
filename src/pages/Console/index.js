@@ -13,7 +13,7 @@ class Console extends PureComponent {
     }
 
     componentWillMount() {
-      axios.get('http://localhost:3000/api/v1/matters')
+      axios.get(`${process.env.REACT_APP_V1_API_URL}/matters`)
       .then((resp) => {
           const data = resp.data.map(x => ({
               id: x.id,
