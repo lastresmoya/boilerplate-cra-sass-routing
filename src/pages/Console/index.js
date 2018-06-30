@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import axios from 'axios';
-import { Row, Grid, Col } from 'react-bootstrap';
+import { Row, Grid, Col, Button } from 'react-bootstrap';
 import { Calendar, Notes, NewMatterModal } from '../../components';
 
 class Console extends PureComponent {
@@ -115,7 +115,20 @@ class Console extends PureComponent {
         .catch((error) => {
             console.log(error);
         });
+    }
 
+    deleteMatter(id) {
+      axios.delete(`${process.env.REACT_APP_V1_API_URL}/matters/${this.state.selectedMatterId}`)
+        .then((resp) => {
+            const data = this.state.mattersList.filter(x => ( x.id !== resp.data.id ))
+            this.setState({
+              mattersList: data,
+              selectedMatterId: null,
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+        });
     }
 
     initLoadReady() {
@@ -187,6 +200,7 @@ class Console extends PureComponent {
               />
               {selectedMatterId &&
                 <Col sm={3}>
+                  <Button onClick={() => this.deleteMatter()}>Delete Matter</Button>
                   <Notes
                     list={notesList}
                     handleSave={() => this.handleSave()}
