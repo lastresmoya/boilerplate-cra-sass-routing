@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Row, Grid, Col, Button } from 'react-bootstrap';
 import { ActionCable } from 'react-actioncable-provider';
 
-import { Calendar, Notes, NewMatterModal } from '../../components';
+import { Calendar, Notes, NewMatterModal, ControlPanel } from '../../components';
 
 class Console extends PureComponent {
 
@@ -219,15 +219,19 @@ class Console extends PureComponent {
               />
               {selectedMatterId &&
                 <Col sm={3}>
+                  <ControlPanel
+                    handleClose={() => this.setState({ selectedMatterId: null})}
+                  >
                   <Button onClick={() => this.deleteMatter()}>Delete Matter</Button>
-                  <Notes
-                    list={notesList}
-                    handleSave={() => this.handleSave()}
-                    handleChange={(e) => this.handleChange(e)}
-                    value={newNoteInput}
-                    notesListLoading={notesListLoading}
-                    handleDelete={(e) => this.deleteMatterNote(e.target.id)}
-                  />
+                    <Notes
+                      list={notesList}
+                      handleSave={() => this.handleSave()}
+                      handleChange={(e) => this.handleChange(e)}
+                      value={newNoteInput}
+                      notesListLoading={notesListLoading}
+                      handleDelete={(e) => this.deleteMatterNote(e.target.id)}
+                    />
+                  </ControlPanel>
                 </Col>
               }
             </Row>
