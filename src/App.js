@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import BigCalendar from 'react-big-calendar';
 import moment from 'moment';
+import { ActionCableProvider } from 'react-actioncable-provider';
 
 import {
   Console,
@@ -14,7 +15,9 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Console />
+        <ActionCableProvider url={process.env.REACT_APP_ACTION_CABLE_URL}>
+          <Console />
+        </ActionCableProvider>,
       </div>
     );
   }

@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
 import axios from 'axios';
 import { Row, Grid, Col, Button } from 'react-bootstrap';
+import { ActionCable } from 'react-actioncable-provider';
+
 import { Calendar, Notes, NewMatterModal } from '../../components';
 
 class Console extends PureComponent {
@@ -166,6 +168,19 @@ class Console extends PureComponent {
       })
     }
 
+    handleReceivedMattersChannelBroadcast(response) {
+      const data = {
+        id: response.id,
+        title: response.title,
+        startAt: new Date(response.start_at),
+        endAt: new Date(response.end_at),
+    };
+      this.setState({
+        mattersList: this.state.mattersList.concat(data),
+      })
+    };
+  
+
     render() {
       const { 
         mattersList,
@@ -180,6 +195,10 @@ class Console extends PureComponent {
       } = this.state;
       return (
         <Grid>
+          <ActionCable
+            channel={{ channel: 'MattersChannel' }}
+            onReceived={(response) => this.handleReceivedMattersChannelBroadcast(response)}
+          />
           {this.initLoadReady() ?
             <Row>
               <Col sm={selectedMatterId ? 9 : 12}>
