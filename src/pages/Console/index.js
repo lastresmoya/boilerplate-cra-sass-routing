@@ -11,7 +11,8 @@ class Console extends PureComponent {
         mattersList: [],
         notesList: [],
         mattersListLoaded: false,
-        notesListLoaded: false
+        notesListLoaded: false,
+        value: ''
       }
     }
 
@@ -56,12 +57,43 @@ class Console extends PureComponent {
         });
     }
 
+    createNote() {
+      axios.post(`${process.env.REACT_APP_V1_API_URL}/matters/36/notes`, {
+        body: this.state.value,
+      })
+        .then((resp) => {
+          console.log('resp', resp)
+          const data = {id: resp.data.id, body: resp.data.body};
+          this.setState({
+            notesList: this.state.notesList.concat(data),
+            value: '',
+          })
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    }
+
     initLoadReady() {
       return this.state.mattersListLoaded && this.state.notesListLoaded
     }
 
+    handleSave() {
+      this.createNote();
+    }
+
+    handleChange(e) {
+      this.setState({
+        value: e.target.value,
+      })
+    }
+
     render() {
-      const { mattersList, notesList } = this.state;
+      const { 
+        mattersList,
+        notesList,
+        value,
+      } = this.state;
       return (
         <Grid>
           {this.initLoadReady() ?
@@ -74,6 +106,9 @@ class Console extends PureComponent {
               <Col sm={3}>
                 <Notes
                   list={notesList}
+                  handleSave={() => this.handleSave()}
+                  handleChange={(e) => this.handleChange(e)}
+                  value={value}
                 />
               </Col>
             </Row>

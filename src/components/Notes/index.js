@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import NoteForm from './NoteForm';
 
-function Notes({ list }) {
+function Notes({ list, handleChange,  handleSave, value}) {
   return(
     <div>
       <ul>
@@ -10,6 +11,11 @@ function Notes({ list }) {
            <li key={x.id}>{x.body}</li>
         ))}
       </ul>
+      <NoteForm
+        handleSave={handleSave}
+        handleChange={handleChange}
+        value={value}
+      />
     </div>
   )
 }
