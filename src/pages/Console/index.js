@@ -11,14 +11,14 @@ class Console extends PureComponent {
         mattersList: [],
         notesList: [],
         mattersListLoaded: false,
-        notesListLoaded: false,
-        value: ''
+        notesListLoading: false,
+        value: '',
+        selectedMatterId: null,
       }
     }
 
     componentWillMount() {
        this.fetchMattersList();
-       this.fetchNotesList();
     }
 
     fetchMattersList() {
@@ -40,8 +40,9 @@ class Console extends PureComponent {
         });
     }
 
-    fetchNotesList() {
-      axios.get(`${process.env.REACT_APP_V1_API_URL}/matters/36/notes`)
+    fetchNotesList(id) {
+      this.setState({ notesListLoading: true })
+      axios.get(`${process.env.REACT_APP_V1_API_URL}/matters/${id}/notes`)
         .then((resp) => {
             const data = resp.data.map(x => ({
                 id: x.id,
@@ -49,7 +50,8 @@ class Console extends PureComponent {
             }))
             this.setState({
               notesList: data,
-              notesListLoaded: true
+              notesListLoading: false,
+              selectedMatterId: id,
             })
         })
         .catch((error) => {
@@ -60,9 +62,9 @@ class Console extends PureComponent {
     createNote() {
       axios.post(`${process.env.REACT_APP_V1_API_URL}/matters/36/notes`, {
         body: this.state.value,
+        matter_id: this.state.selectedMatterId,
       })
         .then((resp) => {
-          console.log('resp', resp)
           const data = {id: resp.data.id, body: resp.data.body};
           this.setState({
             notesList: this.state.notesList.concat(data),
@@ -75,7 +77,7 @@ class Console extends PureComponent {
     }
 
     initLoadReady() {
-      return this.state.mattersListLoaded && this.state.notesListLoaded
+      return this.state.mattersListLoaded
     }
 
     handleSave() {
@@ -88,29 +90,39 @@ class Console extends PureComponent {
       })
     }
 
+    selectMatter(e) {
+      this.fetchNotesList(e.id);
+    }
+
     render() {
       const { 
         mattersList,
         notesList,
         value,
+        notesListLoading,
+        selectedMatterId,
       } = this.state;
       return (
         <Grid>
           {this.initLoadReady() ?
             <Row>
-              <Col sm={9}>
+              <Col sm={selectedMatterId ? 9 : 12}>
                 <Calendar
                   events={mattersList}
+                  handleSelectMatter={(e) => this.selectMatter(e)}
                 />
               </Col>
-              <Col sm={3}>
-                <Notes
-                  list={notesList}
-                  handleSave={() => this.handleSave()}
-                  handleChange={(e) => this.handleChange(e)}
-                  value={value}
-                />
-              </Col>
+              {selectedMatterId &&
+                <Col sm={3}>
+                  <Notes
+                    list={notesList}
+                    handleSave={() => this.handleSave()}
+                    handleChange={(e) => this.handleChange(e)}
+                    value={value}
+                    notesListLoading={notesListLoading}
+                  />
+                </Col>
+              }
             </Row>
             :
             <h1>Loading...</h1>
