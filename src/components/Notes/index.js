@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import NoteForm from './NoteForm';
 
-function Notes({ list, handleChange,  handleSave, value, notesListLoading}) {
+function Notes({ list, handleChange,  handleSave, value, notesListLoading, handleDelete}) {
   return(
     <div>
       { notesListLoading ?
@@ -11,7 +11,7 @@ function Notes({ list, handleChange,  handleSave, value, notesListLoading}) {
         :
         <ul>
           {list.map(x => (
-             <li key={x.id}>{x.body}</li>
+             <li key={x.id}>{x.body} <a id={`delete_${x.id}`} onClick={handleDelete}>Delete</a></li>
           ))}
         </ul>
       }
@@ -32,6 +32,7 @@ Notes.propTypes = {
       })
     ).isRequired,
     notesListLoading: PropTypes.bool.isRequired,
+    handleDelete: PropTypes.func.isRequired
 }
 
 export default Notes;

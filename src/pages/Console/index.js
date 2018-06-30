@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import axios from 'axios';
 import { Row, Grid, Col } from 'react-bootstrap';
-import { Calendar, Notes } from '../../components';
+import { Calendar, Notes, NewMatterModal } from '../../components';
 
 class Console extends PureComponent {
 
@@ -12,8 +12,12 @@ class Console extends PureComponent {
         notesList: [],
         mattersListLoaded: false,
         notesListLoading: false,
-        value: '',
+        newNoteInput: '',
         selectedMatterId: null,
+        newMatterModalShow: false,
+        startAt: null,
+        endAt: null,
+        newMatterInput: ''
       }
     }
 
@@ -59,21 +63,59 @@ class Console extends PureComponent {
         });
     }
 
+    createMatter() {
+      axios.post(`${process.env.REACT_APP_V1_API_URL}/matters`, {
+        title: this.state.newMatterInput,
+        start_at: this.state.startAt,
+        end_at: this.state.endAt,
+      })
+        .then((resp) => {
+          const data = {
+              id: resp.data.id,
+              title: resp.data.title,
+              startAt: new Date(resp.data.start_at),
+              endAt: new Date(resp.data.end_at),
+          };
+          this.setState({
+            mattersList: this.state.mattersList.concat(data),
+          })
+          this.unloadNewMatterModal();
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    }
+
     createNote() {
-      axios.post(`${process.env.REACT_APP_V1_API_URL}/matters/36/notes`, {
-        body: this.state.value,
+      axios.post(`${process.env.REACT_APP_V1_API_URL}/matters/${this.state.selectedMatterId}/notes`, {
+        body: this.state.newNoteInput,
         matter_id: this.state.selectedMatterId,
       })
         .then((resp) => {
           const data = {id: resp.data.id, body: resp.data.body};
           this.setState({
             notesList: this.state.notesList.concat(data),
-            value: '',
+            newNoteInput: '',
           })
         })
         .catch((error) => {
             console.log(error);
         });
+    }
+
+    deleteMatterNote(id) {
+      const strippedId = id.replace('delete_', '');
+      axios.delete(`${process.env.REACT_APP_V1_API_URL}/matters/${this.state.selectedMatterId}/notes/${strippedId}`)
+        .then((resp) => {
+            const data = this.state.notesList.filter(x => ( x.id !== resp.data.id ))
+            this.setState({
+              notesList: data,
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+
     }
 
     initLoadReady() {
@@ -86,7 +128,7 @@ class Console extends PureComponent {
 
     handleChange(e) {
       this.setState({
-        value: e.target.value,
+        [e.target.id]: e.target.value,
       })
     }
 
@@ -94,13 +136,34 @@ class Console extends PureComponent {
       this.fetchNotesList(e.id);
     }
 
+    selectSlot(e) {
+      this.setState({
+        newMatterModalShow: true,
+        startAt: e.start,
+        endAt: e.end,
+      })
+    }
+
+    unloadNewMatterModal() {
+      this.setState({
+        newMatterModalShow: false,
+        startAt: null,
+        endAt: null,
+        newMatterInput: ''
+      })
+    }
+
     render() {
       const { 
         mattersList,
         notesList,
-        value,
+        newNoteInput,
         notesListLoading,
         selectedMatterId,
+        newMatterModalShow,
+        startAt,
+        endAt,
+        newMatterInput
       } = this.state;
       return (
         <Grid>
@@ -110,16 +173,27 @@ class Console extends PureComponent {
                 <Calendar
                   events={mattersList}
                   handleSelectMatter={(e) => this.selectMatter(e)}
+                  handleSelectSlot={(e) => this.selectSlot(e)}
                 />
               </Col>
+              <NewMatterModal
+                show={newMatterModalShow}
+                handleClose={() => this.unloadNewMatterModal()}
+                startAt={startAt}
+                endAt={endAt}
+                handleChange={(e) => this.handleChange(e)}
+                value={newMatterInput}
+                handleSave={() => this.createMatter()}
+              />
               {selectedMatterId &&
                 <Col sm={3}>
                   <Notes
                     list={notesList}
                     handleSave={() => this.handleSave()}
                     handleChange={(e) => this.handleChange(e)}
-                    value={value}
+                    value={newNoteInput}
                     notesListLoading={notesListLoading}
+                    handleDelete={(e) => this.deleteMatterNote(e.target.id)}
                   />
                 </Col>
               }

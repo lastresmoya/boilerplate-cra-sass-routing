@@ -8,8 +8,8 @@ function NoteForm({ handleSave, value, handleChange }) {
       <input
         value={value}
         onChange={handleChange}
-        id="note"
-        name="note"
+        id="newNoteInput"
+        name="newNoteInput"
       />
       <button
         onClick={handleSave}

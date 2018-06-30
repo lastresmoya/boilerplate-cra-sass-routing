@@ -5,7 +5,7 @@ import BigCalendar from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 
-function Calendar({ events, handleSelectMatter }) {
+function Calendar({ events, handleSelectMatter, handleSelectSlot }) {
   return(
     <div>
       <BigCalendar
@@ -13,6 +13,8 @@ function Calendar({ events, handleSelectMatter }) {
         startAccessor='startAt'
         endAccessor='endAt'
         onSelectEvent={handleSelectMatter}
+        onSelectSlot={handleSelectSlot}
+        selectable={true}
       />
     </div>
   )
@@ -28,6 +30,7 @@ Calendar.propTypes = {
     })
   ).isRequired,
   handleSelectMatter: PropTypes.func.isRequired,
+  handleSelectSlot: PropTypes.func.isRequired,
 }
 
 export default Calendar;
